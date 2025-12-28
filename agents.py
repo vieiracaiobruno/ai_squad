@@ -1,6 +1,16 @@
 """
 IT Squad Agents Definition
 This module defines the agents for the IT squad: Project Manager, Tech Lead, Developer, and Tester.
+
+Each agent is configured with:
+- role: The agent's specialized function
+- goal: The agent's primary objective
+- backstory: Background and expertise
+- tools: Available capabilities (currently GitHub tools via LangChain)
+- llm: Language model for reasoning (configurable via OPENAI_MODEL_NAME)
+- allow_delegation: Whether the agent can delegate tasks to other agents
+
+To customize tools, modify the tools parameter or add additional tools from crewai-tools.
 """
 
 from crewai import Agent
@@ -10,7 +20,12 @@ import os
 
 
 def get_llm():
-    """Get the language model for agents."""
+    """
+    Get the language model for agents.
+    
+    The model can be configured via the OPENAI_MODEL_NAME environment variable.
+    Default is gpt-4. For lower costs, consider using gpt-3.5-turbo or gpt-4o-mini.
+    """
     model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-4")
     return ChatOpenAI(model=model_name, temperature=0.7)
 
