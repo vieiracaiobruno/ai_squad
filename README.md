@@ -11,11 +11,13 @@ Este projeto implementa um squad completo de TI usando o framework CrewAI, compo
 - **💻 Developer**: Implementa funcionalidades seguindo as especificações
 - **🧪 Tester**: Garante qualidade através de testes rigorosos
 
-Cada agente tem acesso a ferramentas do GitHub através da integração com LangChain, permitindo:
-- Criar e gerenciar repositórios
-- Criar branches e fazer commits
-- Abrir e revisar pull requests
-- Criar e gerenciar issues
+Cada agente tem acesso a ferramentas do GitHub através da integração com PyGithub e LangChain, permitindo:
+- **Buscar informações de repositórios** - Obter detalhes, estatísticas e metadados
+- **Listar e ler arquivos** - Explorar estrutura de diretórios e ler conteúdo de arquivos
+- **Pesquisar código** - Buscar código em todos os repositórios do GitHub
+- **Gerenciar issues** - Listar, visualizar e criar issues
+- **Trabalhar com pull requests** - Listar e analisar PRs abertos
+- **Pesquisar repositórios** - Encontrar projetos relevantes no GitHub
 - E muito mais!
 
 ## 🛠️ Tecnologias Utilizadas
@@ -77,12 +79,60 @@ OPENAI_MODEL_NAME=gpt-4
 3. Vá para API Keys
 4. Crie uma nova chave API
 
-**GitHub Token:**
+**GitHub Token (Método Recomendado):**
+
+Este projeto suporta duas formas de autenticação com o GitHub:
+
+**Opção 1: Personal Access Token (PAT) - Recomendado para começar**
+
+Mais simples e rápida de configurar. Ideal para desenvolvedores individuais:
+
 1. Acesse https://github.com/settings/tokens
 2. Clique em "Generate new token" → "Generate new token (classic)"
-3. Dê um nome descritivo
-4. Selecione os escopos necessários: `repo`, `workflow`, `admin:org`
+3. Dê um nome descritivo (ex: "AI Squad Token")
+4. Selecione os escopos necessários:
+   - `repo` - Acesso completo a repositórios privados e públicos
+   - `workflow` - Atualizar workflows do GitHub Actions
+   - `read:org` - Ler dados da organização (opcional, apenas se precisar)
 5. Clique em "Generate token" e copie o token
+6. Adicione ao arquivo `.env`:
+   ```
+   GITHUB_TOKEN=seu_token_aqui
+   ```
+
+**Opção 2: GitHub App - Para produção**
+
+Mais segura para uso organizacional e produção:
+
+1. Crie um GitHub App: https://github.com/settings/apps/new
+2. Configure as permissões necessárias
+3. Gere uma chave privada
+4. Instale o app no seu repositório ou organização
+5. Adicione ao arquivo `.env`:
+   ```
+   GITHUB_APP_ID=seu_app_id
+   GITHUB_APP_PRIVATE_KEY=caminho_para_chave.pem
+   GITHUB_REPOSITORY=owner/repo
+   ```
+
+Para mais detalhes sobre GitHub Apps: https://docs.github.com/en/apps/creating-github-apps
+
+### Verificar a Configuração
+
+Antes de executar o squad, você pode verificar se tudo está configurado corretamente:
+
+```bash
+# Verificar configuração básica (não requer OpenAI API Key)
+python verify_github_integration.py
+
+# Verificar configuração completa (requer todas as credenciais)
+python verify_setup.py
+```
+
+Esses scripts vão verificar:
+- ✅ Se as dependências estão instaladas
+- ✅ Se as credenciais estão configuradas
+- ✅ Se as ferramentas do GitHub estão funcionando
 
 ## 🚀 Como Usar
 
@@ -93,6 +143,20 @@ Execute o script principal:
 ```bash
 python main.py
 ```
+
+### Testar Integração com GitHub
+
+Para ver o Developer agent usando as ferramentas do GitHub:
+
+```bash
+python example_github_integration.py
+```
+
+Este exemplo demonstra:
+- Busca de repositórios no GitHub
+- Análise de código de projetos existentes
+- Leitura de arquivos de repositórios
+- Pesquisa de exemplos de código
 
 ### Personalizar o Projeto
 
@@ -135,8 +199,47 @@ ai_squad/
 ├── crew.py             # Configuração da crew
 ├── agents.py           # Definição dos agentes
 ├── tasks.py            # Definição das tarefas
-└── tools.py            # Integração com GitHub via LangChain
+└── tools.py            # Integração com GitHub via PyGithub/LangChain
 ```
+
+## 🔧 Ferramentas do GitHub
+
+O projeto inclui integração completa com GitHub, fornecendo 8 ferramentas especializadas para os agentes:
+
+### Ferramentas Disponíveis
+
+1. **get_github_repo_info** - Obter informações detalhadas de um repositório
+   - Estatísticas, descrição, linguagens, etc.
+
+2. **list_github_repo_files** - Listar arquivos e diretórios
+   - Explorar estrutura de repositórios
+
+3. **read_github_file** - Ler conteúdo de arquivos
+   - Analisar código-fonte e documentação
+
+4. **search_github_code** - Buscar código no GitHub
+   - Encontrar exemplos e implementações
+
+5. **list_github_issues** - Listar issues abertas
+   - Acompanhar bugs e funcionalidades
+
+6. **get_github_issue** - Obter detalhes de uma issue específica
+   - Analisar problemas em profundidade
+
+7. **list_github_prs** - Listar pull requests abertos
+   - Revisar mudanças propostas
+
+8. **search_github_repositories** - Buscar repositórios
+   - Descobrir projetos e bibliotecas
+
+### Como Funciona
+
+O Developer agent (e outros agentes) podem usar essas ferramentas automaticamente quando precisam:
+- Pesquisar exemplos de código
+- Analisar projetos similares
+- Buscar soluções para problemas
+- Explorar estruturas de repositórios
+- Acompanhar issues e PRs
 
 ## 🤖 Agentes
 
@@ -144,25 +247,25 @@ ai_squad/
 - **Papel**: Gerente de Projetos
 - **Objetivo**: Coordenar o projeto e garantir eficiência
 - **Habilidades**: Planejamento, gestão de riscos, comunicação
-- **Ferramentas**: GitHub API (issues, milestones, projects)
+- **Ferramentas**: Todas as ferramentas do GitHub
 
 ### Tech Lead
 - **Papel**: Líder Técnico
 - **Objetivo**: Definir arquitetura e melhores práticas
 - **Habilidades**: Arquitetura de software, code review, mentoria
-- **Ferramentas**: GitHub API (branches, PRs, code review)
+- **Ferramentas**: Todas as ferramentas do GitHub
 
 ### Developer
 - **Papel**: Desenvolvedor
 - **Objetivo**: Implementar funcionalidades de alta qualidade
 - **Habilidades**: Programação, clean code, testes
-- **Ferramentas**: GitHub API (commits, branches, PRs)
+- **Ferramentas**: Todas as ferramentas do GitHub (foco em code search e file reading)
 
 ### Tester
 - **Papel**: Engenheiro de QA
 - **Objetivo**: Garantir qualidade através de testes
 - **Habilidades**: Testes automatizados/manuais, QA
-- **Ferramentas**: GitHub API (issues, PR reviews)
+- **Ferramentas**: Todas as ferramentas do GitHub (foco em issues e PRs)
 
 ## 🔄 Workflow do Squad
 

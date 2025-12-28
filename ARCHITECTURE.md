@@ -83,23 +83,31 @@
 └──────────────────────────────────────────┘
 
 ### Tools Layer
-┌──────────────────────────────────────────┐
-│ GitHub Integration (via LangChain):       │
-│ ✓ Repository operations                   │
-│ ✓ Branch management                       │
-│ ✓ Commit operations                       │
-│ ✓ Pull request management                 │
-│ ✓ Issue tracking                          │
-│ ✓ Code review comments                    │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│ GitHub Integration (via PyGithub + LangChain):                   │
+│                                                                   │
+│ 8 Specialized Tools:                                             │
+│ 1. get_github_repo_info - Repository information and stats       │
+│ 2. list_github_repo_files - Browse repository structure          │
+│ 3. read_github_file - Read file contents from repos              │
+│ 4. search_github_code - Search code across GitHub                │
+│ 5. list_github_issues - List repository issues                   │
+│ 6. get_github_issue - Get detailed issue information             │
+│ 7. list_github_prs - List pull requests                          │
+│ 8. search_github_repositories - Search for repositories          │
+│                                                                   │
+│ Authentication Methods:                                           │
+│ • Personal Access Token (PAT) - Simple setup                     │
+│ • GitHub App - Production/organizational use                     │
+└──────────────────────────────────────────────────────────────────┘
 
 ### External Services
 ┌──────────────────────────────────────────┐
 │ OpenAI API (GPT-4)                        │
 │ └─ Language model for agents              │
 │                                           │
-│ GitHub API                                │
-│ └─ Repository and collaboration tools     │
+│ GitHub API (via PyGithub)                 │
+│ └─ Repository operations and code search  │
 └──────────────────────────────────────────┘
 
 ## Data Flow
@@ -210,6 +218,38 @@ ai_squad/
                               └─> agents.py
                                   └─> Initialize LLM
                                       └─> Create agents
+```
+
+## GitHub Tools Integration
+
+```
+tools.py initialization flow:
+    │
+    ├─> Check GITHUB_TOKEN
+    │   ├─> If present:
+    │   │   ├─> Create PyGithub client
+    │   │   ├─> Authenticate with GitHub
+    │   │   └─> Create 8 specialized tools
+    │   └─> If missing → Check GitHub App credentials
+    │
+    ├─> Check GITHUB_APP_ID + GITHUB_APP_PRIVATE_KEY
+    │   ├─> If present:
+    │   │   ├─> Use LangChain GitHubToolkit
+    │   │   └─> Create tools via GitHub App
+    │   └─> If missing → Return empty tools list
+    │
+    └─> Return github_tools list
+        └─> Used by all agents
+
+Available GitHub Tools:
+1. get_github_repo_info      - Get repository information
+2. list_github_repo_files    - List files in repository
+3. read_github_file          - Read file contents
+4. search_github_code        - Search code on GitHub
+5. list_github_issues        - List repository issues
+6. get_github_issue          - Get issue details
+7. list_github_prs           - List pull requests
+8. search_github_repositories - Search repositories
 ```
 
 ## Error Handling

@@ -46,8 +46,42 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxxx
 
 #### Como obter o GitHub Token:
 
+O projeto suporta duas formas de autenticação com o GitHub:
+
+**Opção 1: Personal Access Token (Recomendado para começar)**
+
+Mais simples e rápida de configurar:
+
 1. Acesse https://github.com/settings/tokens
 2. Clique em "Generate new token" → "Generate new token (classic)"
+3. Dê um nome descritivo (ex: "AI Squad Token")
+4. **Selecione os seguintes escopos (permissões):**
+   - ✅ `repo` - Acesso completo a repositórios
+   - ✅ `workflow` - Atualizar workflows
+   - ✅ `read:org` - Ler informações da organização (opcional)
+5. Clique em "Generate token"
+6. **IMPORTANTE**: Copie o token imediatamente (começa com `ghp_`)
+7. Adicione ao arquivo `.env`:
+   ```
+   GITHUB_TOKEN=ghp_seu_token_aqui
+   ```
+
+**Opção 2: GitHub App (Para produção/organizações)**
+
+Para ambientes de produção ou uso organizacional:
+
+1. Crie um GitHub App em https://github.com/settings/apps/new
+2. Configure as permissões necessárias
+3. Gere uma chave privada (.pem)
+4. Instale o app no seu repositório ou organização
+5. Adicione ao arquivo `.env`:
+   ```
+   GITHUB_APP_ID=123456
+   GITHUB_APP_PRIVATE_KEY=/caminho/para/chave.pem
+   GITHUB_REPOSITORY=owner/repo
+   ```
+
+> 💡 **Dica**: Para uso pessoal e aprendizado, use a Opção 1 (Personal Access Token). É muito mais simples!
 3. Dê um nome (ex: "AI Squad")
 4. Selecione os escopos:
    - `repo` (acesso total aos repositórios)
