@@ -8,6 +8,7 @@ Based on LangChain documentation: https://docs.langchain.com/oss/python/integrat
 """
 
 import os
+import itertools
 from dotenv import load_dotenv
 from typing import Optional, List
 from crewai.tools import BaseTool
@@ -17,6 +18,25 @@ load_dotenv()
 
 # Initialize github_tools as an empty list by default
 github_tools = []
+
+
+def parse_repo_path(input_str: str, default_path: str = '') -> tuple:
+    """
+    Helper function to parse 'owner/repo:path' format safely.
+    
+    Args:
+        input_str: Input string in format 'owner/repo:path' or 'owner/repo'
+        default_path: Default path if no path is provided
+    
+    Returns:
+        Tuple of (repo_name, path)
+    """
+    # Find the last occurrence of ':' to handle edge cases
+    parts = input_str.rsplit(':', 1)
+    if len(parts) == 2:
+        return parts[0], parts[1]
+    else:
+        return parts[0], default_path
 
 
 def create_github_tools_with_pat(token: str, repository: Optional[str] = None) -> List:
@@ -79,10 +99,7 @@ URL: {repo.html_url}"""
         def list_repo_files(repo_and_path: str) -> str:
             """List files in a repository directory. Input format: 'owner/repo:path' or just 'owner/repo' for root."""
             try:
-                if ':' in repo_and_path:
-                    repo_name, path = repo_and_path.split(':', 1)
-                else:
-                    repo_name, path = repo_and_path, ''
+                repo_name, path = parse_repo_path(repo_and_path)
                 
                 repo = g.get_repo(repo_name)
                 contents = repo.get_contents(path)
@@ -109,10 +126,11 @@ URL: {repo.html_url}"""
         def read_file_content(repo_file: str) -> str:
             """Read content of a file from a repository. Input format: 'owner/repo:path/to/file'."""
             try:
-                if ':' not in repo_file:
+                repo_name, file_path = parse_repo_path(repo_file)
+                
+                if not file_path:
                     return "Error: Input must be in format 'owner/repo:path/to/file'"
                 
-                repo_name, file_path = repo_file.split(':', 1)
                 repo = g.get_repo(repo_name)
                 content = repo.get_contents(file_path)
                 
@@ -120,8 +138,12 @@ URL: {repo.html_url}"""
                     return f"Error: {file_path} is not a file"
                 
                 # Decode content (it's base64 encoded)
-                file_content = content.decoded_content.decode('utf-8')
-                return file_content
+                # Handle potential encoding issues
+                try:
+                    file_content = content.decoded_content.decode('utf-8')
+                    return file_content
+                except UnicodeDecodeError:
+                    return f"Error: Unable to decode file content as UTF-8. This may be a binary file."
             except Exception as e:
                 return f"Error reading file: {e}"
         
@@ -137,7 +159,8 @@ URL: {repo.html_url}"""
             try:
                 results = g.search_code(query)
                 findings = []
-                for i, result in enumerate(results[:10], 1):  # Limit to 10 results
+                # Use itertools.islice for efficient iteration
+                for i, result in enumerate(itertools.islice(results, 10), 1):
                     findings.append(f"{i}. {result.repository.full_name}/{result.path}")
                 
                 return "\n".join(findings) if findings else "No results found"
@@ -158,7 +181,8 @@ URL: {repo.html_url}"""
                 issues = repo.get_issues(state='open')
                 
                 issue_list = []
-                for i, issue in enumerate(list(issues)[:20], 1):  # Limit to 20 issues
+                # Use itertools.islice for efficient iteration
+                for i, issue in enumerate(itertools.islice(issues, 20), 1):
                     issue_list.append(f"#{issue.number}: {issue.title} (@{issue.user.login})")
                 
                 return "\n".join(issue_list) if issue_list else "No open issues"
@@ -175,10 +199,11 @@ URL: {repo.html_url}"""
         def get_issue(repo_and_issue: str) -> str:
             """Get details of a specific issue. Input format: 'owner/repo:issue_number'."""
             try:
-                if ':' not in repo_and_issue:
+                repo_name, issue_num = parse_repo_path(repo_and_issue)
+                
+                if not issue_num:
                     return "Error: Input must be in format 'owner/repo:issue_number'"
                 
-                repo_name, issue_num = repo_and_issue.split(':', 1)
                 repo = g.get_repo(repo_name)
                 issue = repo.get_issue(int(issue_num))
                 
@@ -206,7 +231,8 @@ Comments: {issue.comments}
                 prs = repo.get_pulls(state='open')
                 
                 pr_list = []
-                for i, pr in enumerate(list(prs)[:20], 1):  # Limit to 20 PRs
+                # Use itertools.islice for efficient iteration
+                for i, pr in enumerate(itertools.islice(prs, 20), 1):
                     pr_list.append(f"#{pr.number}: {pr.title} (@{pr.user.login})")
                 
                 return "\n".join(pr_list) if pr_list else "No open pull requests"
@@ -225,7 +251,8 @@ Comments: {issue.comments}
             try:
                 results = g.search_repositories(query)
                 repos = []
-                for i, repo in enumerate(list(results)[:15], 1):  # Limit to 15 results
+                # Use itertools.islice for efficient iteration
+                for i, repo in enumerate(itertools.islice(results, 15), 1):
                     repos.append(f"{i}. {repo.full_name} ⭐{repo.stargazers_count} - {repo.description or 'No description'}")
                 
                 return "\n".join(repos) if repos else "No repositories found"

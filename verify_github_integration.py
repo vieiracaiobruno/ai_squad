@@ -35,7 +35,6 @@ def test_github_credentials():
     
     if github_token:
         print("✓ GITHUB_TOKEN is configured")
-        print(f"  Token preview: {github_token[:10]}...")
         return True
     elif github_app_id and github_app_key:
         print("✓ GitHub App credentials are configured")
