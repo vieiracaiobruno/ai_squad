@@ -10,17 +10,23 @@ Based on LangChain documentation: https://docs.langchain.com/oss/python/integrat
 import os
 import itertools
 from dotenv import load_dotenv
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from crewai.tools import BaseTool
 
 # Load environment variables
 load_dotenv()
 
+# Constants for result limits
+MAX_CODE_SEARCH_RESULTS = 10
+MAX_ISSUES_RESULTS = 20
+MAX_PRS_RESULTS = 20
+MAX_REPO_SEARCH_RESULTS = 15
+
 # Initialize github_tools as an empty list by default
 github_tools = []
 
 
-def parse_repo_path(input_str: str, default_path: str = '') -> tuple:
+def parse_repo_path(input_str: str, default_path: str = '') -> Tuple[str, str]:
     """
     Helper function to parse 'owner/repo:path' format safely.
     
@@ -160,7 +166,7 @@ URL: {repo.html_url}"""
                 results = g.search_code(query)
                 findings = []
                 # Use itertools.islice for efficient iteration
-                for i, result in enumerate(itertools.islice(results, 10), 1):
+                for i, result in enumerate(itertools.islice(results, MAX_CODE_SEARCH_RESULTS), 1):
                     findings.append(f"{i}. {result.repository.full_name}/{result.path}")
                 
                 return "\n".join(findings) if findings else "No results found"
@@ -182,7 +188,7 @@ URL: {repo.html_url}"""
                 
                 issue_list = []
                 # Use itertools.islice for efficient iteration
-                for i, issue in enumerate(itertools.islice(issues, 20), 1):
+                for i, issue in enumerate(itertools.islice(issues, MAX_ISSUES_RESULTS), 1):
                     issue_list.append(f"#{issue.number}: {issue.title} (@{issue.user.login})")
                 
                 return "\n".join(issue_list) if issue_list else "No open issues"
@@ -232,7 +238,7 @@ Comments: {issue.comments}
                 
                 pr_list = []
                 # Use itertools.islice for efficient iteration
-                for i, pr in enumerate(itertools.islice(prs, 20), 1):
+                for i, pr in enumerate(itertools.islice(prs, MAX_PRS_RESULTS), 1):
                     pr_list.append(f"#{pr.number}: {pr.title} (@{pr.user.login})")
                 
                 return "\n".join(pr_list) if pr_list else "No open pull requests"
@@ -252,7 +258,7 @@ Comments: {issue.comments}
                 results = g.search_repositories(query)
                 repos = []
                 # Use itertools.islice for efficient iteration
-                for i, repo in enumerate(itertools.islice(results, 15), 1):
+                for i, repo in enumerate(itertools.islice(results, MAX_REPO_SEARCH_RESULTS), 1):
                     repos.append(f"{i}. {repo.full_name} ⭐{repo.stargazers_count} - {repo.description or 'No description'}")
                 
                 return "\n".join(repos) if repos else "No repositories found"
