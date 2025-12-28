@@ -6,9 +6,26 @@ Each agent is configured with:
 - role: The agent's specialized function
 - goal: The agent's primary objective
 - backstory: Background and expertise
-- tools: Available capabilities (currently GitHub tools via LangChain)
+- tools: Available capabilities (GitHub tools via PyGithub/LangChain)
 - llm: Language model for reasoning (configurable via OPENAI_MODEL_NAME)
 - allow_delegation: Whether the agent can delegate tasks to other agents
+
+GitHub Tools Integration:
+All agents have access to 8 GitHub tools when GITHUB_TOKEN or GitHub App credentials are configured:
+1. get_github_repo_info - Get repository information and statistics
+2. list_github_repo_files - Browse repository file structure
+3. read_github_file - Read file contents from repositories
+4. search_github_code - Search for code across GitHub
+5. list_github_issues - List repository issues
+6. get_github_issue - Get detailed issue information
+7. list_github_prs - List pull requests
+8. search_github_repositories - Search for repositories
+
+The Developer agent particularly benefits from these tools to:
+- Research existing implementations before coding
+- Find code examples and best practices
+- Analyze similar projects for architectural patterns
+- Read documentation from popular repositories
 
 To customize tools, modify the tools parameter or add additional tools from crewai-tools.
 """
@@ -74,6 +91,7 @@ def create_developer() -> Agent:
     """
     Creates the Developer agent.
     Responsible for implementing features, fixing bugs, and writing code.
+    Has access to GitHub tools for research and learning from existing code.
     """
     return Agent(
         role="Developer",
@@ -82,7 +100,9 @@ def create_developer() -> Agent:
         backstory="Você é um desenvolvedor de software altamente qualificado com experiência "
                   "em múltiplas linguagens de programação e frameworks. Você é detalhista, "
                   "escreve código limpo e testável, e está sempre atualizado com as últimas "
-                  "tecnologias. Você tem um forte compromisso com a qualidade e a excelência técnica.",
+                  "tecnologias. Você tem um forte compromisso com a qualidade e a excelência técnica. "
+                  "Você usa ferramentas do GitHub para pesquisar exemplos de código, analisar projetos "
+                  "similares e aprender as melhores práticas antes de implementar novas funcionalidades.",
         verbose=True,
         allow_delegation=False,
         llm=get_llm(),
