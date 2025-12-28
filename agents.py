@@ -6,10 +6,13 @@ This module defines the agents for the IT squad: Project Manager, Tech Lead, Dev
 from crewai import Agent
 from langchain_openai import ChatOpenAI
 from tools import github_tools
+import os
 
 
-# Initialize the LLM
-llm = ChatOpenAI(model="gpt-4", temperature=0.7)
+def get_llm():
+    """Get the language model for agents."""
+    model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-4")
+    return ChatOpenAI(model=model_name, temperature=0.7)
 
 
 def create_project_manager() -> Agent:
@@ -27,7 +30,7 @@ def create_project_manager() -> Agent:
                   "Você tem expertise em metodologias ágeis e é excelente em comunicação.",
         verbose=True,
         allow_delegation=True,
-        llm=llm,
+        llm=get_llm(),
         tools=github_tools
     )
 
@@ -47,7 +50,7 @@ def create_tech_lead() -> Agent:
                   "Você é apaixonado por código de qualidade e mentoria de desenvolvedores.",
         verbose=True,
         allow_delegation=True,
-        llm=llm,
+        llm=get_llm(),
         tools=github_tools
     )
 
@@ -67,7 +70,7 @@ def create_developer() -> Agent:
                   "tecnologias. Você tem um forte compromisso com a qualidade e a excelência técnica.",
         verbose=True,
         allow_delegation=False,
-        llm=llm,
+        llm=get_llm(),
         tools=github_tools
     )
 
@@ -88,6 +91,6 @@ def create_tester() -> Agent:
                   "de alta qualidade.",
         verbose=True,
         allow_delegation=False,
-        llm=llm,
+        llm=get_llm(),
         tools=github_tools
     )
