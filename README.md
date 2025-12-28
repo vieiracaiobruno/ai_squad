@@ -117,6 +117,23 @@ Mais segura para uso organizacional e produção:
 
 Para mais detalhes sobre GitHub Apps: https://docs.github.com/en/apps/creating-github-apps
 
+### Verificar a Configuração
+
+Antes de executar o squad, você pode verificar se tudo está configurado corretamente:
+
+```bash
+# Verificar configuração básica (não requer OpenAI API Key)
+python verify_github_integration.py
+
+# Verificar configuração completa (requer todas as credenciais)
+python verify_setup.py
+```
+
+Esses scripts vão verificar:
+- ✅ Se as dependências estão instaladas
+- ✅ Se as credenciais estão configuradas
+- ✅ Se as ferramentas do GitHub estão funcionando
+
 ## 🚀 Como Usar
 
 ### Uso Básico
@@ -126,6 +143,20 @@ Execute o script principal:
 ```bash
 python main.py
 ```
+
+### Testar Integração com GitHub
+
+Para ver o Developer agent usando as ferramentas do GitHub:
+
+```bash
+python example_github_integration.py
+```
+
+Este exemplo demonstra:
+- Busca de repositórios no GitHub
+- Análise de código de projetos existentes
+- Leitura de arquivos de repositórios
+- Pesquisa de exemplos de código
 
 ### Personalizar o Projeto
 
